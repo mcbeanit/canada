@@ -2,9 +2,14 @@ import scrapy
 import re
 from datetime import date
 
+
 class SenateSpider(scrapy.Spider):
     name = "senate"
-    pattern1 = '<tr>.*?<\/tr>'
+    filename_html = 'senate.html'
+
+    columns_header = "Name\tWiki\tParty\tProvince\tAppointed Date\tNominator\tRetirement Date\tAppointed By"
+    pattern0 = r'^<tbody>(.*?)<\/tbody>'
+    pattern1 = r'<tr>.*?<\/tr>'
     pattern2 = '(<td[>\s].*?<\/td>)'
     pattern3 = '<td><span.*?data-sort-value=\"(.*?)\".*?href="(.*?)\".*?<\/td>'
     pattern4 = '<td>(.*?)<\/td>'
@@ -20,85 +25,25 @@ class SenateSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        l = response.xpath("//table/*").getall()
-        filename = 'senate.html'
-        with open(filename, 'wt') as f:
-           f.write("Name\tWiki\tParty\tProvince\tAppointed Date\tNominator\tRetirement Date\tAppointed By") 
-           tbl = l[0]
-           tbl = tbl.replace("\n","")
-           rows = re.search(self.pattern1,tbl)
-           if rows is None:
-               f.write("There were no matches\n")
-           else:
-               for tr in re.finditer(self.pattern1, tbl):
-                   count = 0
-                   name = ""
-                   wiki = ""
-                   party = ""
-                   province = ""
-                   appointed = ""
-                   m = None
-                   nominator = ""
-                   retirement = ""
-                   gg = ""
+        tables = response.xpath("//table/*").getall()
 
-                   for td in re.finditer(self.pattern2, tr.group(0)):
-                       count += 1
-                       if count == 2:
-                           m = re.match(self.pattern3,td.group(1))
-                           if m is not None:
-                               #print(m.groups())
-                               name = m.group(1)
-                               wiki = m.group(2)
-                           else:
-                               print("match was not made")
+        with open(self.filename_html, 'wt') as f:
+            tbl = tables[0]
+            tbl = tbl.replace('\n', '')
+            tbl = tbl.replace('\r', '')
+            tbl = tbl.replace('\t', '')
+            tbl = re.sub(r'>\s*?<', '><', tbl)
 
-                       if count == 3:
-                           # f.write(f"{td.group(0)}\n")
-                           m = re.match(self.pattern4,td.group(1))   
-                           if m is not None:
-                               party = m.group(1)
-                           else:
-                               print("match was not made (party)") 
-                       if count == 4:
-                          
-                           m = re.match(self.pattern5,td.group(1))       
-                           if m is not None:
-                               province = m.group(1)
-                           else:
-                               print("match was not made (province)")
-                               f.write(f"{td.group(1)}\n")
-                       if count == 5:
-                           m = re.match(self.pattern6, td.group(1))
-                           if m is not None:
-                               appointed = m.group(1)
-                           else:
-                               print("match was not made (appointed date)") 
+            match = re.match(self.pattern0, tbl)
+            if match:
+                rows = match.group(1)
+            else:
+                print('There is no match to find the table rows')
+                assert False
 
-                       if count == 7:
-                           m = re.match(self.pattern6, td.group(1))
-                           if m is not None:
-                               nominator = m.group(1)
-                           else:
-                               print("match was not made (nominator)") 
+            for tr in re.finditer(self.pattern1, rows):
+                f.write(f'{str(tr[0])}\n')
 
-                       if count == 8:
-                           m = re.match(self.pattern6, td.group(1))
-                           if m is not None:
-                               retirement = m.group(1)
-                           else:
-                               print ("match was not made (retirement)" )          
+        f.close()
 
-                   f.write(f"{name}\t{wiki}\t{party}\t{province}\t{appointed}\t{nominator}\t{retirement}\n")
-                   #f.write("\n")}
 
-    
-    def getGG(self, appointedDate):
-        y = date(appointedDate)
-        simon = date(2021,7,26)
-   
-
-				   
-				   
-				   
-				   
