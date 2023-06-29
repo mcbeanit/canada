@@ -1,8 +1,53 @@
 import re
 import csv
 from datetime import date
+
+htmlfile = 'senate.html'
+csvfile = 'senate.csv'
+count = 0
+
+pattern2 = '(<td[>\s].*?<\/td>)'
+name_wiki = r'<td><span.data-sort-value=\"(.*?)\"><span.+?href=\"(.+?)\"'
+pattern4 = '<td>(.*?)<\/td>'
+pattern5 = '<td>.*?(Nunavut|Newfoundland and Labrador|Prince Edward Island|New Brunswick|British Columbia|Manitoba|Nova Scotia|Quebec|Ontario|Yukon|Alberta|Saskatchewan|Northwest Territories).*?<\/td>'
+pattern6 = '<td>.*?>(.*?)<.*?<\/td>'
+extract_td =  r'^<td>(.+?)<\/td><td>(.+?)<\/td><td>(.+?)<\/a><\/td><td>(.+?)<\/span><\/td><td .+?<a href=.+?>(.+?)<\/a><\/td><td>'
+
 def import_current_members_html():
-    pass
+    with open(htmlfile, "rt") as h, open(csvfile, "wt") as csv
+        for tr in h.readlines():
+            count = count + 1
+            if count > 1:
+
+
+                name = ""
+                wiki = ""
+                party = ""
+                province = ""
+                appointed = ""
+                m = None
+                nominator = ""
+                retirement = ""
+                gg = ""
+
+                # senator name and wiki link
+                m = re.match(name_wiki, tr)
+                if m is not None:
+                    name = m.group(1)
+                    wiki = m.group(2)
+                else:
+                    print("match was not made for the name and wiki")
+
+                # party name
+                m = re.match(self.pattern4, td.group(1))
+                if m is not None:
+                    party = m.group(1)
+                else:
+                    print("match was not made (party)")
+
+
+
+
 
  def getGG(self, appointedDate):
         y = date(appointedDate)
