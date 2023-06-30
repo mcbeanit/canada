@@ -14,14 +14,15 @@ class QuotesSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        pattern1 = '^<td>.*?<a\shref=\"(.*?)\"\stitle=.*?>(.*?)<'
-        pattern2 = '^<td>(Conservative|Liberal|New Democratic|Green|Bloc Québécois)'
+        pattern1 = r'^<td>.*?<a\shref=\"(.*?)\"\stitle=.*?>(.*?)<'
+        pattern2 = r'^<td>(Conservative|Liberal|New Democratic|Green|Bloc Québécois)'
         # ^<tr><td.*?<a\shref=\"(\/wiki.*?)\"\stitle=.*?>(.*?)<
 
-        l = response.xpath("//tr").getall()
-        filename = 'parl.html'
+        l = response.xpath("//table/tbody").getall()
+        filename = 'parl43.html'
         with open(filename, 'wt') as f:
-            for n in l:
+            for i in range(1, 12):
+                n = l[i]
                 n = n.replace('\n', '')
                 n = n.replace('\r', '')
                 n = n.replace('\t', '')
@@ -31,13 +32,3 @@ class QuotesSpider(scrapy.Spider):
                 n = re.sub(r'>\s+?<', '><', n)
 
                 f.write(f'{n}\n')
-
-                '''
-                m = re.search(pattern1, n)
-                if m is not None and len(m.groups()) > 0:
-                    f.write(f"{m.group(1)}\t{m.group(2)}\n")
-
-                m = re.search(pattern2, n)
-                if m is not None and len(m.groups()) > 0:
-                    f.write(f"{m.group(1)}\n")
-                '''
