@@ -11,54 +11,20 @@ district_exp = r'^<td><a href=\"(.+?)\"\stitle=\"(.+?)\">(.+?)<\/a>.*?<\/td><\/t
 expected_count = 338
 
 def import_current_members_parliament43():
-    count = 0
+    tbl_count: int = 0
+    count: int = 0
     with open(html_filename, 'rt') as h, open(csv_filename, 'wt') as c:
         for tbl in h.readlines():
-            matches = re.finditer(regex, tbl, re.MULTILINE)
-            count = count + 1
+            tbl_count = tbl_count + 1
+            matches = re.finditer(regex, tbl)
+
             if matches is not None:
                 for m in matches:
-                    tr = m.group(1)
-                    m1 = re.match(td_exp, tr)
-                    sorted_mp_name = ''
-                    mp_wiki = ''
-                    mp_name = ''
-                    party_wiki = ''
-                    party_long_name = ''
-                    party_short_name = ''
+                    c.write(f'{m.group(1)}\n')
+                    count = count + 1
 
-                    if m1 is not None:
-                        m2 = re.match(name_wiki_exp1, m1.group(1))
-                        if m2 is not None:
-                            sorted_mp_name = m2.group(2)
-                            mp_wiki = m2.group(3)
-                            mp_name = m2.group(4)
-                        else:
-                            m2 = re.match(name_wiki_epx2, m1.group(1))
-                            if m2 is not None:
-                                mp_wiki = m2.group(1)
-                                sorted_mp_name = m2.group(2)
-                                mp_name = m2.group(3)
-                            else:
-                                print('There is no match for name/wiki')
-                                print(m1.group(1))
-                                assert False
-
-                        m2 = re.match(partyname_wiki_exp, m1.group(2))
-                        if m2 is not None:
-                            party_wiki = m2.group(1)
-                            party_long_name = m2.group(2)
-                            party_short_name = m2.group(3)
-                            # print(f'{party_wiki}\t{party_long_name}\t{party_short_name}')
-
-                        m2 = re.match(district_exp, m2.group(3))
-                        if m2 is not None:
-                            district_wiki = m2.group(1)
-                            district_name = m2.group(3)
-                count = count + 1
-                print(count)
-            else:
-                print('the tr rows were not matched in the table html')
+        print(f"There were {tbl_count} tables found")
+        print(f'There were {count} members found')
 
 
 
